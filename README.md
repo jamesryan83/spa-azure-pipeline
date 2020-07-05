@@ -9,6 +9,11 @@ This can be done using the Standard Microsoft CDN as explained here
 https://github.com/MicrosoftDocs/azure-docs/issues/43257#issuecomment-580668444
 
 
+Purge azure CDN endpoint devops extension
+
+https://marketplace.visualstudio.com/items?itemName=fabienlavocat.FabienLavocat-PurgeAzureCDNEndpoint
+
+
 References
 
 https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
