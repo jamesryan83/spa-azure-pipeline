@@ -1,0 +1,68 @@
+# Node.js with Angular
+# Build a Node.js project that uses Angular.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest' # windows is required for AZCopy
+
+steps:
+
+# js content-type is missing from registry so add it here
+- script: reg add HKCR\.js /v "Content Type" /d application/javascript /f
+  displayName: Add .js content type to registry for AzCopy
+
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install -g @angular/cli
+  displayName: 'Install angular cli'
+
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    command: install
+
+- task: Npm@1
+  displayName: 'npm run build:prod'
+  inputs:
+    command: custom
+    customCommand: run build:prod
+
+# print contents of dist folder
+- script: |
+    cd dist
+    dir /s
+  displayName: 'list files in dist folder'
+
+- task: AzureCLI@2
+  displayName: 'Delete Existing Files'
+  inputs:
+    azureSubscription: 'your-subscription-id'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    inlineScript: 'az storage blob delete-batch -s `$web --account-name paything --auth-mode login'
+
+- task: AzureFileCopy@4  # Requires Storage Account role assignments to be added in IAM
+  inputs:
+    SourcePath: '$(Build.SourcesDirectory)/dist/www/*'
+    azureSubscription: 'your-subscription-id'
+    Destination: 'AzureBlob'
+    storage: 'paything'
+    ContainerName: '$web'
+    CleanTargetBeforeCopy: true
+
+- task: PurgeAzureCDNEndpoint@2
+  inputs:
+    ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+    ConnectedServiceNameARM: 'your-subscription-id'
+    ResourceGroupName: 'paything'
+    EndpointName: 'paything'
+    ProfileName: 'paything'
+    PurgeContent: '/*'
