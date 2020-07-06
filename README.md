@@ -4,7 +4,7 @@
 
 Azure devops pipeline to build an Angular 9 app and deploy it to an Azure Storage static website container.
 
-This can be done using the Standard Microsoft CDN as explained here
+An angular app served from a storage account requires a url rewrite rule to redirect all requests to the index url '/'.  This can be done using the Standard Microsoft CDN as explained here
 
 https://github.com/MicrosoftDocs/azure-docs/issues/43257#issuecomment-580668444
 
